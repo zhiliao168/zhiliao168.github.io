@@ -1,1 +1,502 @@
-# zhiliao168.github.io
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知了导航</title>
+<style>
+:root {
+  --bg:#f5f7fa; --card:#fff; --text:#333; --sub:#9aa0ad;
+  --line:#eef0f4; --primary:#4a7dff; --shadow:0 1px 3px rgba(0,0,0,.05);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+body.bg-img { background-size:cover; background-position:center; background-attachment:fixed; }
+body.bg-img .card,body.bg-img .side,body.bg-img .topbar { background:rgba(255,255,255,.9); backdrop-filter:blur(10px); }
+
+.topbar { background:var(--card); border-bottom:1px solid var(--line); padding:14px 24px; position:sticky; top:0; z-index:50; min-height:64px; }
+.top-inner { max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.logo { font-size:22px; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.logo span { color:var(--primary); }
+
+.search { flex:1; min-width:280px; display:flex; }
+.search input { flex:1; padding:10px 16px; border:1px solid var(--line); border-right:none; border-radius:22px 0 0 22px; outline:none; background:var(--bg); }
+.search select { border:1px solid var(--line); background:var(--bg); padding:0 10px; outline:none; }
+.search button { padding:0 20px; border:none; border-radius:0 22px 22px 0; background:var(--primary); color:#fff; cursor:pointer; }
+
+.tools-row { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+.tools-row .tcard { display:flex; align-items:center; gap:5px; padding:6px 10px; background:var(--bg); border:1px solid var(--line); border-radius:8px; text-decoration:none; color:var(--text); font-size:12px; white-space:nowrap; transition:.15s; }
+.tools-row .tcard:hover { border-color:var(--primary); color:var(--primary); background:#eef3ff; }
+.tools-row .tcard img { width:14px; height:14px; flex-shrink:0; }
+.tools-label { font-size:12px; color:var(--sub); white-space:nowrap; }
+
+.top-right { display:flex; gap:8px; flex-shrink:0; }
+.top-right button { border:1px solid var(--line); background:var(--card); padding:8px 14px; border-radius:10px; cursor:pointer; font-size:13px; }
+.top-right button:hover { border-color:var(--primary); color:var(--primary); }
+
+.layout { display:flex; max-width:1180px; margin:24px auto; padding:0 20px; gap:24px; align-items:flex-start; }
+.side { width:110px; flex-shrink:0; background:var(--card); border-radius:14px; padding:12px 0; box-shadow:var(--shadow); position:sticky; top:0; max-height:calc(100vh - 40px); overflow-y:auto; }
+.side a { display:block; padding:10px 16px; color:var(--text); text-decoration:none; font-size:14px; border-left:3px solid transparent; }
+.side a:hover,.side a.active { background:#eef3ff; color:var(--primary); border-left-color:var(--primary); font-weight:600; }
+.side a.top { margin-top:8px; border-top:1px solid var(--line); color:var(--sub); text-align:center; }
+.main { flex:1; min-width:0; }
+
+.group-title { font-size:16px; font-weight:700; margin:26px 0 12px; padding-left:10px; border-left:4px solid var(--primary); display:flex; align-items:center; gap:8px; }
+.group-title .del-group-btn { display:none; background:none; border:none; cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; opacity:0; transition:.15s; }
+.group-title:hover .del-group-btn { display:inline-block; opacity:1; }
+.group-title .del-group-btn:hover { background:#fee; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); box-shadow:var(--shadow); transition:.15s; position:relative; }
+.card:hover { transform:translateY(-2px); border-color:var(--primary); }
+.card:hover .del-btn { display:flex; }
+.card img { width:22px; height:22px; border-radius:5px; flex-shrink:0; }
+.card .t { font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card .d { font-size:11px; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card .w { min-width:0; }
+.del-btn { display:none; position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#ff4757; color:#fff; border:none; align-items:center; justify-content:center; font-size:14px; font-weight:bold; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.2); transition:.15s; z-index:2; }
+.del-btn:hover { background:#ff3742; transform:scale(1.15); }
+
+.mask { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; align-items:center; justify-content:center; }
+.mask.show { display:flex; }
+.modal { background:var(--card); border-radius:16px; padding:24px; width:360px; }
+.modal h2 { margin:0 0 16px; }
+.modal label { display:block; font-size:12px; color:var(--sub); margin:10px 0 4px; }
+.modal input,.modal select { width:100%; padding:9px 12px; border-radius:10px; border:1px solid var(--line); box-sizing:border-box; }
+.actions { margin-top:18px; display:flex; gap:10px; justify-content:flex-end; }
+.actions button { padding:8px 18px; border:none; border-radius:10px; cursor:pointer; }
+.primary { background:var(--primary); color:#fff; }
+.ghost { background:var(--line); }
+#bgPanel { display:none; position:fixed; bottom:20px; right:20px; background:#fff; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.2); z-index:150; width:300px; }
+#bgPanel.show { display:block; }
+#bgPanel input { width:100%; padding:8px; margin:8px 0; border:1px solid var(--line); border-radius:8px; box-sizing:border-box; }
+#bgPanel button { width:100%; padding:8px; margin-top:6px; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; }
+
+@media (max-width:900px){
+  .tools-row { justify-content:center; }
+  .top-inner { justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="top-inner">
+    <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">知了<span>导航</span></div>
+
+    <div class="search">
+      <input id="kw" placeholder="输入关键词搜索…" onkeydown="if(event.key==='Enter')doSearch()">
+      <select id="engine"><option value="baidu">百度</option><option value="bing">必应</option><option value="google">谷歌</option></select>
+      <button onclick="doSearch()">搜索</button>
+    </div>
+
+    <div class="tools-row" id="toolsBar"></div>
+
+    <div class="top-right">
+      <button onclick="toggleBgPanel()">🎨 换肤</button>
+      <button onclick="openModal()">＋ 添加</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="side" id="side"></div>
+  <div class="main" id="main"></div>
+</div>
+
+<div class="mask" id="modal">
+  <div class="modal">
+    <h2>添加网址</h2>
+    <label>名称</label><input id="f-name">
+    <label>网址</label><input id="f-url" placeholder="https://">
+    <label>描述</label><input id="f-desc">
+    <label>分类</label><select id="f-group"></select>
+    <div class="actions">
+      <button class="ghost" onclick="closeModal()">取消</button>
+      <button class="primary" onclick="addSite()">添加</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="delModal">
+  <div class="modal">
+    <h2 id="delTitle">确认删除</h2>
+    <p id="delMsg" style="font-size:14px;color:var(--sub);margin-bottom:16px;"></p>
+    <div class="actions">
+      <button class="ghost" onclick="closeDelModal()">取消</button>
+      <button class="primary" onclick="confirmDelete()" style="background:#ff4757;">删除</button>
+    </div>
+  </div>
+</div>
+
+<div id="bgPanel">
+  <h4 style="margin:0 0 8px;">换肤</h4>
+  <input type="file" accept="image/*" onchange="uploadLocalImg(this)">
+  <input type="text" id="imgUrl" placeholder="或粘贴图片网址">
+  <button onclick="applyImgUrl()">应用网络图</button>
+  <button onclick="resetBg()" style="background:#999;">恢复纯色</button>
+</div>
+
+<script>
+const defaultData = [
+  { group:"", list:[
+    {name:"查IP",url:"https://www.ip138.com",desc:"IP查询",locked:true},
+    {name:"地图",url:"https://map.baidu.com",desc:"百度地图",locked:true},
+    {name:"火车票",url:"https://www.12306.cn",desc:"12306",locked:true},
+    {name:"计算器",url:"https://www.baidu.com/s?tn=50000021_hao_pg&ie=utf-8&sc=UWd1pgw-pA7EnHc1FMfqnHT4nWm1rHDvPHRLriuW5y99U1Dznzu9m1Y1njD1njDznHb4&ssl_sample=normal&srcqid=-7268257947709285865&H123Tmp=nunew7&word=%E8%AE%A1%E7%AE%97%E5%99%A8",desc:"在线计算",locked:true},
+    {name:"违章查询",url:"https://gab.122.gov.cn/m/index/",desc:"交管12123",locked:true},
+    {name:"网盘",url:"https://pan.baidu.com",desc:"百度网盘",locked:true},
+    {name:"邮箱",url:"https://mail.qq.com",desc:"QQ邮箱",locked:true},
+    {name:"邮箱",url:"https://mail.163.com/",desc:"163邮箱",locked:true},
+    {name:"汇率",url:"https://hl.anseo.cn",desc:"汇率换算",locked:true},
+    {name:"查快递",url:"https://www.kuaidi100.com",desc:"快递100",locked:true},
+    {name:"查股票",url:"https://www.eastmoney.com",desc:"东方财富",locked:true},
+    {name:"个税查询",url:"https://taxcalculator.income-tax.gov.in",desc:"个税计算",locked:true},
+    {name:"翻译",url:"https://fanyi.youdao.com",desc:"有道翻译",locked:true}
+  ]},
+  { group:"热门必备", list:[
+    {name:"抖音",desc:"抖音精选",url:"https://www.douyin.com/jingxuan",locked:true},
+    {name:"今日头条",desc:"资讯",url:"https://www.toutiao.com",locked:true},
+    {name:"腾讯网",desc:"新闻",url:"https://www.qq.com",locked:true},
+    {name:"网易",desc:"新闻",url:"https://www.163.com",locked:true},
+    {name:"微博",desc:"热点",url:"https://weibo.com",locked:true},
+    {name:"淘宝",desc:"网购",url:"https://www.taobao.com",locked:true},
+    {name:"汽车之家",desc:"购车指南",url:"https://www.autohome.com.cn/",locked:true}
+  ]},
+  { group:"AI工具", list:[
+    {name:"DeepSeek",desc:"开源大模型",url:"https://www.deepseek.com",locked:true},
+    {name:"豆包",desc:"免费AI助手",url:"https://www.doubao.com",locked:true},
+    {name:"Seko短剧",desc:"短剧创作",url:"https://www.seko.ai",locked:true},
+    {name:"LibTV",desc:"AI视频",url:"https://www.libtv.com",locked:true},
+    {name:"TRAE",desc:"AI编程",url:"https://www.trae.ai",locked:true},
+    {name:"LiblibAI",desc:"AI绘画",url:"https://www.liblib.art",locked:true},
+    {name:"iSlide AIPPT",desc:"AI做PPT",url:"https://www.islide.cc",locked:true},
+    {name:"在线PS",desc:"网页PS",url:"https://www.photopea.com",locked:true},
+    {name:"AI抠图",desc:"去背景",url:"https://www.remove.bg",locked:true},
+    {name:"waifu2x",desc:"图片放大",url:"https://waifu2x.udp.jp",locked:true}
+  ]},
+  { group:"实用工具", list:[
+    {name:"PDF24",desc:"PDF工具箱",url:"https://tools.pdf24.org",locked:true},
+    {name:"OCR识别",desc:"文字识别",url:"https://ocr.space",locked:true},
+    {name:"草料二维码",desc:"二维码",url:"https://cli.im",locked:true},
+    {name:"JSON工具",desc:"格式化",url:"https://www.json.cn",locked:true},
+    {name:"正则表达式",desc:"正则测试",url:"https://regex101.com",locked:true},
+    {name:"ProcessOn",desc:"在线制图",url:"https://www.processon.com",locked:true},
+    {name:"TinyPNG",desc:"图片压缩",url:"https://tinypng.com",locked:true}
+  ]},
+  { group:"科技酷站", list:[
+    {name:"少数派",desc:"效率工具",url:"https://sspai.com",locked:true},
+    {name:"极客公园",desc:"科技资讯",url:"https://www.geekpark.net",locked:true},
+    {name:"36氪",desc:"商业媒体",url:"https://36kr.com",locked:true},
+    {name:"量子位",desc:"AI前沿",url:"https://www.qbitai.com",locked:true},
+    {name:"全网热榜",desc:"热榜聚合",url:"https://tophub.today",locked:true}
+  ]},
+  { group:"资源搜索", list:[
+    {name:"Google学术",desc:"学术搜索",url:"https://scholar.google.com",locked:true},
+    {name:"百度学术",desc:"学术",url:"https://xueshu.baidu.com",locked:true},
+    {name:"虫部落学术",desc:"聚合搜索",url:"https://scholar.chongbuluo.com",locked:true},
+    {name:"Sci-Hub",desc:"论文库",url:"https://sci-hub.st",locked:true},
+    {name:"千帆搜索",desc:"网盘搜索",url:"https://pan.qianfan.app",locked:true},
+    {name:"猫狸盘搜",desc:"阿里网盘",url:"https://www.alipansou.com",locked:true},
+    {name:"Yandex识图",desc:"以图搜图",url:"https://yandex.ru/images",locked:true}
+  ]},
+  { group:"壁纸美图", list:[
+    {name:"Wallhaven",desc:"高清壁纸",url:"https://wallhaven.cc",locked:true},
+    {name:"Unsplash",desc:"免费图库",url:"https://unsplash.com",locked:true},
+    {name:"Pexels",desc:"图片素材",url:"https://www.pexels.com",locked:true},
+    {name:"花瓣网",desc:"采集",url:"https://huaban.com",locked:true},
+    {name:"站酷",desc:"设计社区",url:"https://www.zcool.com.cn",locked:true}
+  ]},
+  { group:"素材资源", list:[
+    {name:"iconfont",desc:"图标库",url:"https://www.iconfont.cn",locked:true},
+    {name:"千图网",desc:"设计素材",url:"https://www.58pic.com",locked:true},
+    {name:"摄图网",desc:"正版图片",url:"https://699pic.com",locked:true},
+    {name:"字魂",desc:"商用字体",url:"https://www.izihun.com",locked:true}
+  ]},
+  { group:"影音娱乐", list:[
+    {name:"抖音",desc:"短视频",url:"https://www.douyin.com",locked:true},
+    {name:"B站",desc:"哔哩哔哩",url:"https://www.bilibili.com",locked:true},
+    {name:"知乎",desc:"问答",url:"https://www.zhihu.com",locked:true},
+    {name:"爱奇艺",desc:"视频",url:"https://www.iqiyi.com",locked:true},
+    {name:"网易云音乐",desc:"音乐",url:"https://music.163.com",locked:true},
+    {name:"豆瓣",desc:"电影",url:"https://www.douban.com",locked:true}
+  ]},
+  { group:"轻小说", list:[
+    {name:"哔哩轻小说",desc:"在线阅读",url:"https://www.linovel.net",locked:true},
+    {name:"成为小说家吧",desc:"连载",url:"https://syosetu.com",locked:true},
+    {name:"轻小说Animex",desc:"TXT下载",url:"https://www.animex.co",locked:true},
+    {name:"轻小说次元狗",desc:"TXT下载",url:"https://www.ciyuan.cc",locked:true},
+    {name:"起点",desc:"网文",url:"https://www.qidian.com",locked:true}
+  ]},
+  { group:"软件资源", list:[
+    {name:"数码荔枝",desc:"正版软件",url:"https://www.lizhi.io",locked:true},
+    {name:"小众软件",desc:"优质推荐",url:"https://www.appinn.com",locked:true},
+    {name:"吾爱破解",desc:"软件交流",url:"https://www.52pojie.cn",locked:true},
+    {name:"精品MAC",desc:"苹果软件",url:"https://xclient.info",locked:true},
+    {name:"软件管家",desc:"腾讯中心",url:"https://pc.qq.com",locked:true}
+  ]},
+  { group:"正版软件", list:[
+    {name:"正版Windows",desc:"微软",url:"https://www.microsoft.com/zh-cn/windows",locked:true},
+    {name:"Office",desc:"办公套件",url:"https://www.office.com",locked:true},
+    {name:"Adobe",desc:"创意软件",url:"https://www.adobe.com",locked:true},
+    {name:"JetBrains",desc:"开发工具",url:"https://www.jetbrains.com",locked:true},
+    {name:"7-Zip",desc:"压缩",url:"https://www.7-zip.org",locked:true}
+  ]},
+  { group:"学习提升", list:[
+    {name:"MOOC",desc:"慕课",url:"https://www.icourse163.org",locked:true},
+    {name:"网易公开课",desc:"课程",url:"https://open.163.com",locked:true},
+    {name:"多邻国",desc:"语言",url:"https://www.duolingo.com",locked:true},
+    {name:"公考学习",desc:"公考",url:"https://www.offcn.com",locked:true},
+    {name:"AI编程指南",desc:"Claude教程",url:"https://www.ai-coding-guide.com",locked:true},
+    {name:"850单词手册",desc:"单词",url:"https://www.850words.com",locked:true},
+    {name:"PhET实验",desc:"科学实验",url:"https://phet.colorado.edu",locked:true},
+    {name:"中小学教材",desc:"人教社",url:"https://jc.pep.com.cn",locked:true}
+  ]},
+  { group:"知识扩展", list:[
+    {name:"知网",desc:"学术",url:"https://www.cnki.net",locked:true},
+    {name:"维基百科",desc:"百科",url:"https://zh.wikipedia.org",locked:true},
+    {name:"百度百科",desc:"中文百科",url:"https://baike.baidu.com",locked:true},
+    {name:"果壳",desc:"科普",url:"https://www.guokr.com",locked:true},
+    {name:"古腾堡",desc:"电子书",url:"https://www.gutenberg.org",locked:true}
+  ]},
+  { group:"编程开发", list:[
+    {name:"菜鸟教程",desc:"入门",url:"https://www.runoob.com",locked:true},
+    {name:"MDN",desc:"前端文档",url:"https://developer.mozilla.org",locked:true},
+    {name:"廖雪峰",desc:"Python/JS",url:"https://www.liaoxuefeng.com",locked:true},
+    {name:"鸟哥Linux",desc:"Linux",url:"http://linux.vbird.org",locked:true},
+    {name:"GitHub",desc:"代码托管",url:"https://github.com",locked:true},
+    {name:"掘金",desc:"前端社区",url:"https://juejin.cn",locked:true},
+    {name:"CSDN",desc:"技术社区",url:"https://www.csdn.net",locked:true}
+  ]},
+  { group:"游戏娱乐", list:[
+    {name:"4399",desc:"小游戏",url:"https://www.4399.com",locked:true},
+    {name:"Poki",desc:"网页游戏",url:"https://poki.com",locked:true},
+    {name:"Steam",desc:"游戏平台",url:"https://store.steampowered.com",locked:true},
+    {name:"游民星空",desc:"资讯",url:"https://www.gamersky.com",locked:true},
+    {name:"海拥游戏",desc:"2000+游戏",url:"https://www.haiyong.site",locked:true},
+    {name:"STARSHIP",desc:"星舰小游戏",url:"https://starship.game",locked:true}
+  ]},
+  { group:"趣味休闲", list:[
+    {name:"Life Restart",desc:"人生重开",url:"https://liferestart.syaro.io",locked:true},
+    {name:"Typing Game",desc:"打字",url:"https://www.typingclub.com",locked:true},
+    {name:"PlayOK",desc:"棋牌对战",url:"https://www.playok.com",locked:true},
+    {name:"Narrow One",desc:"弓箭对战",url:"https://narrow.one",locked:true},
+    {name:"网页版MC",desc:"Minecraft",url:"https://classic.minecraft.net",locked:true},
+    {name:"Type Words",desc:"单词练习",url:"https://www.typewords.com",locked:true}
+  ]}
+];
+
+let sites = JSON.parse(localStorage.getItem("nav_sites") || "null");
+if(!sites){
+  sites = JSON.parse(JSON.stringify(defaultData));
+  save();
+} else {
+  // 迁移旧数据：给内置网址补上 locked 标记
+  defaultData.forEach(defCat=>{
+    const userCat = sites.find(c=>c.group===defCat.group);
+    if(userCat){
+      defCat.list.forEach(defIt=>{
+        const userIt = userCat.list.find(u=>u.url===defIt.url);
+        if(userIt) userIt.locked = true;
+      });
+    }
+  });
+}
+
+function save(){ localStorage.setItem("nav_sites", JSON.stringify(sites)); }
+function fav(u){ try{ return "https://"+new URL(u).hostname+"/favicon.ico"; }catch(e){ return ""; } }
+
+let _othersCache = [];
+let _pendingDelete = null; // {type:'site', groupIdx, itemIdx} | {type:'group', groupIdx}
+
+function getOffset(){
+  const topbar = document.querySelector('.topbar');
+  return topbar ? topbar.offsetHeight + 12 : 90;
+}
+
+function render(){
+  const toolsGroup = sites.find(c=>c.group==="");
+  _othersCache = sites.filter(c=>c.group!=="");
+
+  const sideHtml = _othersCache.map((c,i)=>`<a href="#g${i}" data-idx="${i}">${c.group}</a>`).join("") +
+    `<a href="#" class="top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ 顶部</a>`;
+  document.getElementById("side").innerHTML = sideHtml;
+
+  const mainHtml = _othersCache.map((c,i)=>{
+    const cardsHtml = c.list.length ? c.list.map((it, idx)=>`
+        <a class="card" href="${it.url}" target="_blank" rel="noopener" title="${it.name}">
+          <img src="${fav(it.url)}" onerror="this.style.display='none'">
+          <div class="w"><div class="t">${it.name}</div><div class="d">${it.desc||''}</div></div>
+          ${it.locked ? '' : `<button class="del-btn" onclick="event.preventDefault();event.stopPropagation();showDelModal('site',${i},${idx})" title="删除">×</button>`}
+        </a>`).join("") : `<div style="color:var(--sub);font-size:13px;padding:8px 0;">暂无内容</div>`;
+    
+    const isBuiltin = c.list.some(it=>it.locked===true);
+    const delGroupBtn = isBuiltin ? '' : `<button class="del-group-btn" onclick="event.preventDefault();showDelModal('group',${i})" title="删除分类">🗑</button>`;
+    
+    return `<div class="group-title" id="g${i}">${c.group}${delGroupBtn}</div><div class="grid">${cardsHtml}</div>`;
+  }).join("");
+  document.getElementById("main").innerHTML = mainHtml;
+
+  document.getElementById("f-group").innerHTML = sites.map(c=>`<option>${c.group}</option>`).join("");
+
+  const tb = document.getElementById("toolsBar");
+  if(toolsGroup && toolsGroup.list.length){
+    tb.innerHTML = `<span class="tools-label"></span>` +
+      toolsGroup.list.map(it=>`
+        <a class="tcard" href="${it.url}" target="_blank" rel="noopener" title="${it.desc||it.name}">
+          <img src="${fav(it.url)}" onerror="this.style.display='none'">
+          <span>${it.name}</span>
+        </a>`).join("");
+  } else { tb.innerHTML = ""; }
+
+  applyOffsets();
+  setActive(0);
+}
+
+function applyOffsets(){
+  const off = getOffset();
+  document.querySelector('.side').style.top = off + 'px';
+  document.querySelectorAll('.group-title').forEach(el=>{
+    el.style.scrollMarginTop = off + 'px';
+  });
+}
+
+function setActive(idx){
+  _activeIdx = idx;
+  document.querySelectorAll(".side a[data-idx]").forEach(a=>{
+    a.classList.toggle("active", parseInt(a.dataset.idx) === idx);
+  });
+}
+
+let _activeIdx = 0;
+let _tick = false;
+
+window.addEventListener("scroll", ()=>{
+  if(_tick) return;
+  _tick = true;
+  requestAnimationFrame(()=>{
+    _tick = false;
+    const off = getOffset();
+    let bestIdx = 0;
+    for(let i=0;i<_othersCache.length;i++){
+      const el = document.getElementById("g"+i);
+      if(!el) continue;
+      if(el.getBoundingClientRect().top <= off){
+        bestIdx = i;
+      }
+    }
+    setActive(bestIdx);
+  });
+});
+
+window.addEventListener("resize", ()=>{
+  applyOffsets();
+});
+
+function openModal(){ document.getElementById("modal").classList.add("show"); }
+function closeModal(){ document.getElementById("modal").classList.remove("show"); }
+
+function addSite(){
+  const n=document.getElementById("f-name").value.trim();
+  const u=document.getElementById("f-url").value.trim();
+  const d=document.getElementById("f-desc").value.trim();
+  const g=document.getElementById("f-group").value;
+  if(!n||!u){ alert("名称和网址必填"); return; }
+  const url=/^https?:\/\//i.test(u)?u:"https://"+u;
+  const targetGroup = sites.find(c=>c.group===g) || sites[0];
+  targetGroup.list.push({name:n, desc:d, url}); // 不写 locked，即可删
+  save(); render(); closeModal();
+  ["f-name","f-url","f-desc"].forEach(id=>document.getElementById(id).value="");
+}
+
+function showDelModal(type, groupIdx, itemIdx){
+  _pendingDelete = {type, groupIdx, itemIdx};
+  const modal = document.getElementById("delModal");
+  const title = document.getElementById("delTitle");
+  const msg = document.getElementById("delMsg");
+  if(type==='site'){
+    const it = _othersCache[groupIdx].list[itemIdx];
+    title.textContent = "删除网址";
+    msg.textContent = `确定要删除「${it.name}」吗？此操作不可恢复。`;
+  } else {
+    title.textContent = "删除分类";
+    msg.textContent = `确定要删除「${_othersCache[groupIdx].group}」及其中所有网址吗？此操作不可恢复。`;
+  }
+  modal.classList.add("show");
+}
+
+function closeDelModal(){
+  document.getElementById("delModal").classList.remove("show");
+  _pendingDelete = null;
+}
+
+function confirmDelete(){
+  if(!_pendingDelete) return;
+  const {type, groupIdx, itemIdx} = _pendingDelete;
+  
+  if(type==='site'){
+    const group = _othersCache[groupIdx];
+    const target = group.list[itemIdx];
+    if(target && target.locked === true){ alert("内置网址不可删除"); closeDelModal(); return; }
+    const realGroupIdx = sites.findIndex(c=>c.group===group.group);
+    if(realGroupIdx>-1) sites[realGroupIdx].list.splice(itemIdx,1);
+  } else {
+    const group = _othersCache[groupIdx];
+    if(group.list.some(it=>it.locked===true)){ alert("内置分类不可删除"); closeDelModal(); return; }
+    const realGroupIdx = sites.findIndex(c=>c.group===group.group);
+    if(realGroupIdx>-1) sites.splice(realGroupIdx,1);
+  }
+  
+  save(); render(); closeDelModal();
+}
+
+function doSearch(){
+  const kw=document.getElementById("kw").value.trim();
+  const e=document.getElementById("engine").value;
+  if(!kw) return;
+  const m={baidu:"https://www.baidu.com/s?wd=",bing:"https://www.bing.com/search?q=",google:"https://www.google.com/search?q="};
+  window.open(m[e]+encodeURIComponent(kw),"_blank");
+}
+
+/* ===== 换肤 ===== */
+function toggleBgPanel(){ document.getElementById("bgPanel").classList.toggle("show"); }
+function applyBg(v){
+  document.body.style.backgroundImage = `url(${v})`;
+  document.body.classList.add("bg-img");
+  try { localStorage.setItem("nav_bg", v); } catch(err){}
+}
+function applyImgUrl(){
+  const v = document.getElementById("imgUrl").value.trim();
+  if(!v){ alert("先填图片网址"); return; }
+  applyBg(v);
+}
+function uploadLocalImg(input){
+  const f = input.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(ev){ applyBg(ev.target.result); input.value=""; };
+  r.readAsDataURL(f);
+}
+function resetBg(){
+  document.body.style.backgroundImage = "none";
+  document.body.classList.remove("bg-img");
+  localStorage.removeItem("nav_bg");
+  document.getElementById("imgUrl").value = "";
+}
+
+document.addEventListener("click",e=>{
+  const p=document.getElementById("bgPanel");
+  if(!p.contains(e.target) && !(e.target.closest("button")&&e.target.closest("button").textContent.includes("换肤")))
+    p.classList.remove("show");
+  if(e.target===document.getElementById("delModal")) closeDelModal();
+});
+
+(function(){
+  const b = localStorage.getItem("nav_bg");
+  if(b){ document.body.style.backgroundImage=`url(${b})`; document.body.classList.add("bg-img"); }
+})();
+
+render();
+</script>
+</body>
+</html>
