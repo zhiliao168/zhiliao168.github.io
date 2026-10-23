@@ -337,7 +337,9 @@ function render(){
   }).join("");
   document.getElementById("main").innerHTML = mainHtml;
 
-  document.getElementById("f-group").innerHTML = sites.map(c=>`<option>${c.group}</option>`).join("");
+  document.getElementById("f-group").innerHTML = sites
+  .filter(c=>c.group!=="")
+  .map(c=>`<option>${c.group}</option>`).join("");
 
   const tb = document.getElementById("toolsBar");
   if(toolsGroup && toolsGroup.list.length){
